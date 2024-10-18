@@ -1,79 +1,109 @@
-import CrossIcon from './components/icons/CrossIcon';
-import MoonIcon from './components/icons/MoonIcon';
+import { useState } from "react";
+import Footer from "./Footer";
+import Header from "./Header";
+import TodoComputed from "./TodoComputed";
+import TodoCreate from "./TodoCreate";
+import TodoFilter from "./TodoFilter";
+import TodoList from "./TodoList";
 
+const initialStateTodos = [
+	{
+		id: 1,
+		title: "Complete the fucking curse",
+		completed: true,
+	},
+	{
+		id: 2,
+		title: "Go to the Gym again",
+		completed: true,
+	},
+	{
+		id: 3,
+		title: "10 minutes meditation",
+		completed: true,
+	},
+	{
+		id: 4,
+		title: "Pick up groseries",
+		completed: false,
+	},
+	{
+		id: 5,
+		title: "Complete Todo FrontendMentor",
+		completed: false,
+	},
+];
 const App = () => {
-    return (
-        <div
-            className=" min-h-screen bg-gray-200  bg-[url('./assets/images/bg-mobile-light.jpg')] 
-            bg-contain bg-no-repeat "
-        >
-            <header className="container mx-auto pax-4 pt-8">
-                <div className="flex justify-between">
-                    <h1 className="uppercase text-white text-3xl  letter-spacing font-semibold tracking-[0.3em]">
-                        TODO
-                    </h1>
-                    <button>
-                        <MoonIcon />
-                    </button>
-                </div>
-                <form className="flex bg-white rounded-md overflow-hidden mt-8 py-4 px-4 gap-4 items-center">
-                    <span className="rounded-full border-2 inline-block h-5 w-5"></span>
-                    <input
-                        className="w-full text-gray-400 outline-none"
-                        type="text"
-                        placeholder="Create a new ToDo"
-                    />
-                </form>
-            </header>
+	const [todos, setTodos] = useState(initialStateTodos);
+	const createTodo = (title) => {
+		const newTodo = {
+			id: Date.now(),
+			title: title.trim(),
+			completed: false,
+		};
+		setTodos([...todos, newTodo]);
+	};
+	const removeTodo = (id) => {
+		setTodos(todos.filter((todo) => todo.id !== id));
+	};
 
-            <main className="container mx-auto mt-6 ">
-                <div className="bg-white rounded-md [&>article]:px-4">
-                    <article className="flex gap-4 py-4  border-b-gray-300 border-b">
-                        <button className="flex-none rounded-full border-2 h-5 w-5 inline-block"></button>
-                        <p className="flex-none text-gray-500 grow">
-                            Complete Online Javascript curse
-                        </p>
-                        <button className="">
-                            <CrossIcon />
-                        </button>
-                    </article>
+	const updateTodo = (id) => {
+		setTodos(
+			todos.map((todo) =>
+				todo.id === id
+					? {
+							...todo,
+							completed: !todo.completed,
+						}
+					: todo
+			)
+		);
+	};
 
-                    <article className="flex gap-4 py-4  border-b-gray-300 border-b">
-                        <button className="flex-none rounded-full border-2 h-5 w-5 inline-block"></button>
-                        <p className="flex-none text-gray-500 grow">
-                            Complete Online Javascript curse
-                        </p>
-                        <button className="">
-                            <CrossIcon />
-                        </button>
-                    </article>
+	const computedItemLeft = todos.filter((todo) => !todo.completed).length;
 
-                    <article className="flex gap-4 py-4  border-b-gray-300 border-b">
-                        <button className="flex-none rounded-full border-2 h-5 w-5 inline-block"></button>
-                        <p className="flex-none text-gray-500 grow">
-                            Complete Online Javascript curse
-                        </p>
-                        <button className="">
-                            <CrossIcon />
-                        </button>
-                    </article>
-                    <section className="py-4 px-4 flex justify-between">
-                        <span className="text-gray-400">5 item left</span>
-                        <button className="text-gray-400">Clear Completed</button>
-                    </section>
-                </div>
-            </main>
+	const clearCompleted = () => {
+		setTodos(todos.filter((todo) => !todo.completed));
+	};
 
-            <section className="container mx-auto pax-4">
-                <div className=" flex gap-4 bg-white mt-8 p-4 rounded-md justify-center">
-                    <button className="hover:text-blue-600">All</button>
-                    <button className="hover:text-blue-600">Active</button>
-                    <button className="hover:text-blue-600">Completed</button>
-                </div>
-            </section>
+	const [filter, setFilter] = useState("all");
 
-            <section className="text-center">Drag and drop to reorder list</section>
-        </div>
-    );
+	const changeFilter = (filter) => setFilter(filter);
+
+	const filterTodos = () => {
+		switch (filter) {
+			case "all":
+				return todos;
+			case "active":
+				return todos.filter((todo) => !todo.completed);
+			case "completed":
+				return todos.filter((todo) => todo.completed);
+			default:
+				return todos;
+		}
+	};
+
+	return (
+		<div
+			className=" min-h-screen bg-gray-200  bg-[url('./assets/images/bg-mobile-light.jpg')] dark:bg-[url('./assets/images/bg-mobile-dark.jpg')] 
+            bg-contain bg-no-repeat dark:bg-gray-900 transition-all duration-1000"
+		>
+			<Header />
+			<main className="container mx-auto mt-8">
+				<TodoCreate createTodo={createTodo} />
+				<TodoList
+					todos={filterTodos()}
+					removeTodo={removeTodo}
+					updateTodo={updateTodo}
+				/>
+				<TodoComputed
+					computedItemLeft={computedItemLeft}
+					clearCompleted={clearCompleted}
+				/>
+				<TodoFilter changeFilter={changeFilter} filter={filter} />
+			</main>
+			<Footer />
+		</div>
+	);
 };
 export default App;
